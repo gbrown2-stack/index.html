@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Tutor Agent Simulation (Enhanced)</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        max-width: 860px;
+        background: white;
+        margin-top: 20px;
+        padding: 30px;
+        border-radius: 14px;
+        box-shadow: 0 3px 14px rgba(0,0,0,0.12);
+        animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h1, h2 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    button, select {
+        padding: 10px 15px;
+        margin: 7px 0;
+        border: 1px solid #bbb;
+        border-radius: 6px;
+        background: #fafafa;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #e8e8e8;
+    }
+
+    .step { display: none; }
+    .active { display: block; }
+
+    .agent-speech {
+        background: #e8f2ff;
+        padding: 15px;
+        margin-top: 15px;
+        border-left: 5px solid #1e88e5;
+        border-radius: 4px;
+    }
+
+    .thinking {
+        background: #f0f0f0;
+        padding: 10px;
+        margin-top: 10px;
+        border-left: 4px solid #888;
+        font-style: italic;
+        display: none;
+    }
+
+    .user-input {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+    }
+
+    .summary {
+        background: #fff7e6;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+
+    .progress {
+        margin: 5px 0 15px;
+        font-size: 14px;
+        color: #444;
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>AI Tutor Agent Simulation</h1>
+    <p style="text-align:center;">Experience adaptive AI tutoring as it adjusts to your knowledge and responses.</p>
+
+    <label>
+        <input type="checkbox" id="toggleThinking" checked>
+        Show AI Thinking
+    </label>
+
+    <div class="progress" id="progress">Progress: 1/4</div>
+
+    <!-- Start -->
+    <div id="start" class="step active">
+        <h2>Choose a Scenario</h2>
+        <select id="scenario">
+            <option value="reading">Reading Research Article (Sleep & Learning)</option>
+            <option value="writing">Writing: Thesis Statement Feedback</option>
+            <option value="data">Data Analysis: Interpreting Results</option>
+        </select>
+        <br><button onclick="startSimulation()">Begin</button>
+    </div>
+
+    <!-- Diagnostic -->
+    <div id="diagnostic" class="step">
+        <div id="diagText" class="agent-speech"></div>
+        <button onclick="respondDiagnostic('low')">I don’t know much yet</button>
+        <button onclick="respondDiagnostic('medium')">I know some basics</button>
+        <button onclick="respondDiagnostic('high')">I know this topic well</button>
+        <div class="thinking" id="thinking1"></div>
+    </div>
+
+    <!-- Scaffolding -->
+    <div id="scaffolding" class="step">
+        <div id="scaffold-speech" class="agent-speech"></div>
+        <button id="scaffold-btn1" onclick="respondScaffold()"></button>
+        <button id="scaffold-btn2" onclick="respondScaffold()"></button>
+        <div class="thinking" id="thinking2"></div>
+    </div>
+
+    <!-- Application -->
+    <div id="application" class="step">
+        <div id="appPrompt" class="agent-speech"></div>
+        <input id="app-input" class="user-input" placeholder="Write your response...">
+        <button onclick="finishSession()">Submit</button>
+        <div class="thinking" id="thinking3"></div>
+    </div>
+
+    <!-- Summary -->
+    <div id="summary" class="step">
+        <h2>Session Summary</h2>
+        <div id="personal-summary" class="summary"></div>
+        <button onclick="resetSimulation()">Try Another Scenario</button>
+    </div>
+
+</div>
+
+<script>
+/* ----------------------
+   GLOBAL STATE
+-----------------------*/
+let userKnowledge = '';
+let scenario = 'reading';
+let progressCount = 1;
+
+/* Utility: Typing simulation for agent text */
+function typeText(element, text, callback=null) {
+    element.innerHTML = "";
+    let i = 0;
+    let speed = 18;
+    function typing() {
+        if (i < text.length) {
+            element.innerHTML += text.charAt(i++);
+            setTimeout(typing, speed);
+        } else if (callback) {
+            callback();
+        }
+    }
+    typing();
+}
+
+/* Show/hide thinking based on checkbox */
+function updateThinkingVisibility() {
+    document.querySelectorAll('.thinking').forEach(div => {
+        div.style.display = document.getElementById('toggleThinking').checked ? 'block' : 'none';
+    });
+}
+document.getElementById("toggleThinking").addEventListener("change", updateThinkingVisibility);
+
+/* Update progress indicator */
+function updateProgress(step) {
+    progressCount = step;
+    document.getElementById("progress").innerText = `Progress: ${step}/4`;
+}
+
+/* ----------------------
+   STEP FUNCTIONS
+-----------------------*/
+
+function startSimulation() {
+    scenario = document.getElementById("scenario").value;
+
+    // Scenario-specific diagnostic prompt
+    const diagText = {
+        reading: "Before we read this article on sleep & learning—what do you already know about how sleep affects academic performance?",
+        writing: "Before we evaluate thesis statements—what do you already know about what makes a thesis strong?",
+        data: "Before we interpret these results—how comfortable are you with reading graphs and statistical summaries?"
+    };
+
+    typeText(document.getElementById("diagText"), diagText[scenario]);
+
+    document.getElementById("start").classList.remove("active");
+    document.getElementById("diagnostic").classList.add("active");
+
+    updateProgress(2);
+}
+
+function respondDiagnostic(level) {
+    userKnowledge = level;
+
+    const thinking = document.getElementById("thinking1");
+    thinking.innerHTML = `AI Thinking: Assessing baseline knowledge level (${level}) and selecting appropriate scaffolding...`;
+    updateThinkingVisibility();
+
+    // Build scaffolds per scenario
+    let scaffoldData = getScaffoldContent(scenario, level);
+
+    typeText(document.getElementById("scaffold-speech"), scaffoldData.prompt);
+    document.getElementById("scaffold-btn1").innerText = scaffoldData.option1;
+    document.getElementById("scaffold-btn2").innerText = scaffoldData.option2;
+
+    document.getElementById("diagnostic").classList.remove("active");
+    document.getElementById("scaffolding").classList.add("active");
+
+    updateProgress(3);
+}
+
+/* Scenario-specific + level-specific scaffolds */
+function getScaffoldContent(scenario, level) {
+    const scaffolds = {
+        reading: {
+            low: {
+                prompt: "A key idea: Students who sleep less than 6 hours show up to a 40% drop in memory retention. What does 'retention' mean to you?",
+                option1: "It means forgetting information.",
+                option2: "It means storing information long-term."
+            },
+            medium: {
+                prompt: "The article highlights that REM cycles help consolidate information. How do you think this connects to effective study habits?",
+                option1: "It helps with late-night cramming.",
+                option2: "It strengthens spaced practice."
+            },
+            high: {
+                prompt: "The study uses college undergrads as the sample. How might that limit its generalizability?",
+                option1: "Different chronotypes aren’t accounted for.",
+                option2: "Sleep culture varies across populations."
+            }
+        },
+
+        writing: {
+            low: {
+                prompt: "A strong thesis clearly states a claim + reasoning. Which of these sounds closest to what a thesis does?",
+                option1: "It's a topic sentence.",
+                option2: "It argues a point with justification."
+            },
+            medium: {
+                prompt: "Writers often struggle with overly broad claims. Which example feels more precise?",
+                option1: "Schools need technology.",
+                option2: "Integrating adaptive AI tools can improve feedback efficiency."
+            },
+            high: {
+                prompt: "Advanced question: How does specificity in a thesis influence the structure of the entire argument?",
+                option1: "It forces you to narrow evidence selection.",
+                option2: "It strengthens the logical flow."
+            }
+        },
+
+        data: {
+            low: {
+                prompt: "When looking at data, one of the first steps is identifying trends. What do you look for first?",
+                option1: "The highest bar or line.",
+                option2: "Where the values change over time."
+            },
+            medium: {
+                prompt: "This chart includes both mean and standard deviation. What insight does standard deviation give you?",
+                option1: "How spread out the scores are.",
+                option2: "Which score is the most common."
+            },
+            high: {
+                prompt: "The dataset has a small sample (n=14). What limitation does this introduce?",
+                option1: "Outliers have stronger influence.",
+                option2: "Statistical power is reduced."
+            }
+        }
+    };
+
+    return scaffolds[scenario][level];
+}
+
+function respondScaffold() {
+    const thinking = document.getElementById("thinking2");
+    thinking.innerHTML = `AI Thinking: Analyzing your scaffold response; preparing application step tailored to your ${userKnowledge} level in the ${scenario} scenario...`;
+    updateThinkingVisibility();
+
+    // Scenario-specific application prompt:
+    const appPrompts = {
+        reading: "Apply this: How would you incorporate sleep research into academic success advice for students?",
+        writing: "Apply this: Revise or create a thesis statement using what you've learned.",
+        data: "Apply this: What conclusion can you draw from a dataset that shows a clear upward trend over time?"
+    };
+
+    typeText(document.getElementById("appPrompt"), appPrompts[scenario]);
+
+    document.getElementById("scaffolding").classList.remove("active");
+    document.getElementById("application").classList.add("active");
+
+    updateProgress(4);
+}
+
+function finishSession() {
+    const input = document.getElementById("app-input").value.trim();
+    const thinking = document.getElementById("thinking3");
+
+    thinking.innerHTML = `AI Thinking: Evaluating depth of your application response...`;
+    updateThinkingVisibility();
+
+    let depth = input.length > 40 ? "Strong" : "Emerging";
+
+    let summary = `
+        <strong>Your Path Summary</strong><br><br>
+        <strong>Scenario:</strong> ${scenario}<br>
+        <strong>Knowledge Level:</strong> ${userKnowledge}<br>
+        <strong>Application Depth:</strong> ${depth}<br><br>
+        <strong>Your Response:</strong><br>${input}<br><br>
+        This path adapted to your prior knowledge, scaffold responses, and writing depth to simulate how an AI tutor adjusts in real-time.
+    `;
+
+    document.getElementById("personal-summary").innerHTML = summary;
+
+    document.getElementById("application").classList.remove("active");
+    document.getElementById("summary").classList.add("active");
+}
+
+function resetSimulation() {
+    location.reload();
+}
+</script>
+
+</body>
+</html>
