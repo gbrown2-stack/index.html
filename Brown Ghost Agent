@@ -1,0 +1,150 @@
+HTML<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Learning Agent Simulation: Reading for Research</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f9f9f9; color: #333; }
+        h1, h2 { text-align: center; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .step { display: none; margin-bottom: 20px; }
+        .step.active { display: block; }
+        button, select { padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #e0e0e0; }
+        .agent-speech { background: #e3f2fd; padding: 15px; border-left: 5px solid #2196f3; margin: 10px 0; }
+        .thinking { background: #f5f5f5; padding: 10px; font-style: italic; color: #666; border-left: 5px solid #9e9e9e; margin: 10px 0; }
+        .user-input { width: 100%; padding: 10px; margin: 10px 0; }
+        .summary { background: #fff3e0; padding: 15px; border-radius: 5px; }
+        #qr-code { text-align: center; font-size: 12px; color: #666; } /* Placeholder for QR if hosted */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Tutor Agent Simulation</h1>
+        <p style="text-align: center;">Experience how an AI agent supports reading for research & application. Answer honestly—your path adapts!</p>
+        
+        <div id="qr-code">For workshops: Share this file or host for QR scanning.</div>
+
+        <!-- Start Step -->
+        <div id="start" class="step active">
+            <h2>Welcome, Student!</h2>
+            <p>You're tasked with reading a research article and applying it to your studies. Choose a scenario:</p>
+            <select id="scenario">
+                <option value="reading">Reading Research Article (Sleep & Learning)</option>
+                <option value="writing">Writing: Thesis Statement Feedback</option>
+                <option value="data">Data Analysis: Interpreting Results</option>
+            </select>
+            <br><button onclick="startSimulation()">Begin Tutoring Session</button>
+        </div>
+
+        <!-- Diagnostic Step -->
+        <div id="diagnostic" class="step">
+            <div class="agent-speech">
+                <strong>AI Agent:</strong> Hi! I'm your AI Tutor. To help you engage with this research article on "Effects of Sleep on Learning," tell me: What do you already know about how sleep impacts academic performance?
+            </div>
+            <button onclick="respondDiagnostic('low')">Not much—I've heard it's important, but no details.</button>
+            <button onclick="respondDiagnostic('medium')">Some basics: Sleep helps memory, but I forget the science.</button>
+            <button onclick="respondDiagnostic('high')">Quite a bit: REM sleep consolidates info; chronic deprivation impairs cognition.</button>
+            <div class="thinking" id="thinking1"></div>
+        </div>
+
+        <!-- Scaffolding Step (Dynamic) -->
+        <div id="scaffolding" class="step">
+            <div class="agent-speech" id="scaffold-speech"></div>
+            <button id="scaffold-btn1" onclick="respondScaffold()"></button>
+            <button id="scaffold-btn2" style="display:none;" onclick="respondScaffold()"></button>
+            <div class="thinking" id="thinking2"></div>
+        </div>
+
+        <!-- Application Step -->
+        <div id="application" class="step">
+            <div class="agent-speech">
+                <strong>AI Agent:</strong> Great progress! Now, apply this: How might you use sleep research in your next paper? (E.g., recommend strategies for students.)
+            </div>
+            <input type="text" id="app-input" class="user-input" placeholder="Your idea...">
+            <button onclick="finishSession()">Submit & See Summary</button>
+            <div class="thinking" id="thinking3">Agent Thinking: Assessing application depth to track growth...</div>
+        </div>
+
+        <!-- Summary Step -->
+        <div id="summary" class="step">
+            <h2>Session Complete!</h2>
+            <div class="summary" id="personal-summary"></div>
+            <button onclick="resetSimulation()">Try Another Path</button>
+            <p><em>Reflection: What surprised you? How could this help your students?</em></p>
+        </div>
+    </div>
+
+    <script>
+        let userKnowledge = '';
+        let scenario = 'reading'; // Default
+        let progress = { start: true, diag: false, scaffold: false, app: false };
+
+        function startSimulation() {
+            scenario = document.getElementById('scenario').value;
+            document.getElementById('start').classList.remove('active');
+            document.getElementById('diagnostic').classList.add('active');
+            progress.diag = true;
+        }
+
+        function respondDiagnostic(level) {
+            userKnowledge = level;
+            document.getElementById('thinking1').innerHTML = `Agent Thinking: Diagnostic complete. User knowledge level: ${level}. Adapting scaffold: ${level === 'low' ? 'High support (summaries + hints)' : level === 'medium' ? 'Medium (key excerpts + questions)' : 'Low (challenges + extensions)'}.`;
+            
+            // Adapt scaffolding
+            const scaffoldSpeech = document.getElementById('scaffold-speech');
+            const btn1 = document.getElementById('scaffold-btn1');
+            const btn2 = document.getElementById('scaffold-btn2');
+            if (level === 'low') {
+                scaffoldSpeech.innerHTML = `<strong>AI Agent:</strong> Let's start simple. Key finding: Sleep deprivation reduces retention by 40% (source: article abstract). What does "retention" mean to you?`;
+                btn1.innerHTML = 'It means forgetting stuff.';
+                btn2.style.display = 'block';
+                btn2.innerHTML = 'Holding onto info long-term.';
+            } else if (level === 'medium') {
+                scaffoldSpeech.innerHTML = `<strong>AI Agent:</strong> Building on what you know: The article cites EEG studies showing theta waves during sleep aid memory. How does this connect to your studying?`;
+                btn1.innerHTML = 'Helps with cramming before exams.';
+                btn2.style.display = 'block';
+                btn2.innerHTML = 'Supports spaced repetition over time.';
+            } else {
+                scaffoldSpeech.innerHTML = `<strong>AI Agent:</strong> You're advanced—let's apply deeply. Critique: The study samples undergrads; how might this limit generalizability to grad research?`;
+                btn1.innerHTML = 'Ignores cultural sleep differences.';
+                btn2.style.display = 'block';
+                btn2.innerHTML = 'Overlooks individual chronotypes.';
+            }
+            
+            document.getElementById('scaffold-btn2').style.display = level === 'high' ? 'block' : 'none'; // Fewer options for advanced
+            document.getElementById('scaffolding').classList.add('active');
+            document.getElementById('diagnostic').classList.remove('active');
+            progress.scaffold = true;
+        }
+
+        function respondScaffold() {
+            document.getElementById('thinking2').innerHTML = `Agent Thinking: Response analyzed. Building on ${userKnowledge} level—advancing to application with tailored prompt. Progress: ${Object.values(progress).filter(Boolean).length}/4 steps.`;
+            document.getElementById('scaffolding').classList.remove('active');
+            document.getElementById('application').classList.add('active');
+            progress.app = true;
+        }
+
+        function finishSession() {
+            const appInput = document.getElementById('app-input').value.trim() || 'A practical strategy idea.';
+            document.getElementById('thinking3').innerHTML += ` User applied concept: "${appInput.substring(0,50)}..." Depth: ${appInput.length > 20 ? 'Strong' : 'Emerging'}.`;
+            
+            let summary = `<strong>Your Personalized Path:</strong><br>`;
+            summary += `- Started with ${scenario} scenario.<br>`;
+            summary += `- Knowledge baseline: ${userKnowledge} (Agent provided ${userKnowledge === 'low' ? 'full breakdowns' : userKnowledge === 'medium' ? 'targeted excerpts' : 'critical challenges'}).<br>`;
+            summary += `- Scaffold adapted: You explored ${userKnowledge === 'low' ? 'basics like retention' : userKnowledge === 'medium' ? 'theta waves' : 'study limitations'}.<br>`;
+            summary += `- Application: "${appInput}" – Agent notes: This shows growth in research application!<br>`;
+            summary += `<em>How it personalized: Tracked your responses to adjust support, saving time while boosting critical thinking.</em>`;
+            
+            document.getElementById('personal-summary').innerHTML = summary;
+            document.getElementById('application').classList.remove('active');
+            document.getElementById('summary').classList.add('active');
+        }
+
+        function resetSimulation() {
+            location.reload(); // Simple reset
+        }
+    </script>
+</body>
+</html>
