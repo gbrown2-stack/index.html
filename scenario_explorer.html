@@ -1,62 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AI Prompt Scenario Explorer</title>
-<style>
-body {
-font-family: Arial, sans-serif;
-background: #f4f4f4;
-margin: 0;
-padding: 0;
-color: #222;
-}
-header {
-background: #3b82f6;
-color: white;
-padding: 1.2rem;
-text-align: center;
-}
-.container {
-max-width: 900px;
-margin: 2rem auto;
-padding: 1rem;
-background: white;
-border-radius: 12px;
-box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-.scenario {
-border: 2px solid #e5e7eb;
-padding: 1rem;
-border-radius: 10px;
-margin-bottom: 1.5rem;
-background: #fafafa;
-}
-.scenario h2 {
-margin-top: 0;
-color: #2563eb;
-}
-button {
-background: #2563eb;
-color: white;
-padding: 0.7rem 1.2rem;
-border: none;
-border-radius: 8px;
-cursor: pointer;
-font-size: 1rem;
-}
-button:hover {
-background: #1e4bb8;
-}
-.hidden {
-display: none;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Prompt Scenario Explorer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      color: #222;
+    }
+    header {
+      background: #3b82f6;
+      color: white;
+      padding: 1.2rem;
+      text-align: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .scenario {
+      border: 2px solid #e5e7eb;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      background: #fafafa;
+    }
+    .scenario h2 {
+      margin-top: 0;
+      color: #2563eb;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      padding: 0.7rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:hover {
+      background: #1e4bb8;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-<header>
-<h1>AI Prompt Scenario Explorer</h1>
-<p>Faculty Group Activity • Scan via QR Code</p>
-</header>
+  <header>
+    <h1>AI Prompt Scenario Explorer</h1>
+    <p>Faculty Group Activity • Scan via QR Code</p>
+  </header>
+
+  <div class="container">
+    <p><strong>Instructions:</strong> Your group has been assigned one scenario (1–5). Click below to reveal your scenario, explore the prompts, and complete the activity together.</p>
+
+    <label for="scenarioSelect"><strong>Select Your Group Scenario:</strong></label>
+    <select id="scenarioSelect" style="padding: 0.5rem; font-size: 1rem; margin-left: 0.5rem;">
+      <option value="">-- Choose Scenario --</option>
+      <option value="1">1. Preparation & Studying</option>
+      <option value="2">2. Writing & Content Generation</option>
+      <option value="3">3. Research & Information Retrieval</option>
+      <option value="4">4. Problem-Solving & Creative Tasks</option>
+      <option value="5">5. Personalized Learning & Tutoring</option>
+    </select>
+
+    <div id="scenarioDisplay" class="scenario hidden"></div>
+  </div>
+
+  <script>
+    const scenarios = {
+      1: {
+        title: "Preparation & Studying",
+        text: `A first-year student is struggling to understand a foundational concept in your field.
+               <br><br><strong>Use These Prompts:</strong>
+               <ul>
+                 <li>Explain this concept at beginner and advanced levels.</li>
+                 <li>Give 3 analogies and 2 visual metaphors.</li>
+                 <li>Generate 10 practice questions + answers.</li>
+                 <li>Identify misconceptions and test us.</li>
+               </ul>
+               <strong>Group Task:</strong> Run the prompts, evaluate the outputs, and rewrite 1 improved prompt.`
+      },
+      2: {
+        title: "Writing & Content Generation",
+        text: `A student submits a rough 2-paragraph draft and wants feedback.
+               <br><br><strong>Use These Prompts:</strong>
+               <ul>
+                 <li>Improve clarity but keep my voice; explain changes.</li>
+                 <li>Create an APA-style outline.</li>
+                 <li>Offer 3 thesis options.</li>
+                 <li>Identify logical gaps and weak transitions.</li>
+               </ul>
+               <strong>Group Task:</strong> Test 2 prompts and refine one to increase rigor.`
+      },
+      3: {
+        title: "Research & Information Retrieval",
+        text: `A graduate student is preparing a literature review.
+               <br><br><strong>Use These Prompts:</strong>
+               <ul>
+                 <li>Summarize research consensus without fabricating sources.</li>
+                 <li>Turn a DOI into key findings + methods + limitations.</li>
+                 <li>Compare 5 theories using a table.</li>
+                 <li>Identify gaps in the literature.</li>
+               </ul>
+               <strong>Group Task:</strong> Evaluate accuracy and identify ways to prevent incorrect citations.`
+      },
+      4: {
+        title: "Problem-Solving & Creative Tasks",
+        text: `A student is stuck on a complex STEM/humanities problem.
+               <br><br><strong>Use These Prompts:</strong>
+               <ul>
+                 <li>Show step-by-step reasoning.</li>
+                 <li>Debug code while asking clarifying questions.</li>
+                 <li>Generate divergent → convergent solutions.</li>
+                 <li>Critique a design using disciplinary principles.</li>
+               </ul>
+               <strong>Group Task:</strong> Identify where AI reasoning was strong or flawed and refine one prompt accordingly.`
+      },
+      5: {
+        title: "Personalized Learning & Tutoring",
+        text: `A student needs exam prep support for a test in five days.
+               <br><br><strong>Use These Prompts:</strong>
+               <ul>
+                 <li>Diagnose misunderstandings via questions first.</li>
+                 <li>Create a personalized 5-day study plan.</li>
+                 <li>Use Socratic questioning to deepen reasoning.</li>
+                 <li>Give feedback on thinking, not just answers.</li>
+               </ul>
+               <strong>Group Task:</strong> Test a tutoring-style prompt and revise it to promote metacognition.`
+      }
+    };
+
+    const scenarioSelect = document.getElementById('scenarioSelect');
+    const scenarioDisplay = document.getElementById('scenarioDisplay');
+
+    scenarioSelect.addEventListener('change', function() {
+      const value = this.value;
+      if (!value) {
+        scenarioDisplay.classList.add('hidden');
+        return;
+      }
+      const s = scenarios[value];
+      scenarioDisplay.innerHTML = `<h2>${s.title}</h2><p>${s.text}</p>`;
+      scenarioDisplay.classList.remove('hidden');
+    });
+  </script>
+</body>
 </html>
